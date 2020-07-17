@@ -209,6 +209,7 @@ china_data %>%
   knitr::kable()
 ```
 
+
 Number of deaths due to COVID-19 by age group in people with and without CVD
 
 ```{r}
