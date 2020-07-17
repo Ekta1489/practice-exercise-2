@@ -1,0 +1,185 @@
+---
+title: "Practice 2"
+author: "Ekta Chaudhary"
+date: "17/07/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(knitr)
+library(readr)
+library(plyr)
+library(StatMeasures)
+library(ggplot2)
+library(haven)
+set.seed(1)
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+```
+
+```{r}
+china_data =  read_sas("./data/corona_china.sas7bdat") %>%
+  janitor::clean_names()
+southkorea_data = read_sas("./data/corona_southkorea.sas7bdat") %>%
+  janitor::clean_names()
+```
+Variable Name	
+ID	Patient unique ID
+Agegroup	Age (years) at diagnosis.
+0 = 0-9 years
+1 = 10-19 years
+2 = 20-29 years
+3 = 30-39 years
+4 = 40-49 years
+5 = 50-59 years
+6 = 60-69 years
+7 = 70-79 years
+8 = 80+ years
+Sex	1 = female
+2 = male
+Hypertension	Comorbid hypertension at COVID19 diagnosis
+1 = yes
+0 = no
+CVD	Comorbid cardiovascular disease at COVID19 diagnosis
+1 = yes
+0 = no
+Dead	1 = yes
+0 = no
+
+```{r}
+china_data %>%
+  group_by(
+    sex
+  ) %>%
+  dplyr::summarise(
+    count = n()
+  ) %>%
+  dplyr::mutate(
+    percent = (count/sum(count))*100
+  ) %>%
+  ggplot(
+    aes(
+      x = factor(sex), y = percent
+    )
+  ) + geom_bar(stat = "identity", width = 0.3) + labs(x = "Sex", y = "Percentage of Deaths", title = "Deaths due to COVID-19 by gender") + theme(axis.text.x = element_text(angle = 90, vjust = 0.9, hjust = 0.9)) 
+```
+
+```{r}
+china_data %>%
+  filter(
+    dead == 1
+  ) %>%
+  mutate(
+    sex = factor(sex), 
+    hypertension = factor(hypertension)
+  ) %>% 
+  group_by(
+    sex, hypertension
+  ) %>%
+  dplyr::summarise(
+    count = n()
+  ) %>%
+  dplyr::mutate(
+    percent = round((count/sum(count))*100, digits = 2)
+  ) %>%
+  ggplot(aes(x = sex, y = percent)) +
+  geom_bar(aes(fill = hypertension), position = "dodge", stat = "identity", width = .5) +
+      geom_text(aes(label = percent, group = hypertension), position = position_dodge(width = 0.5), vjust = -0.5) +
+      labs(x = "Sex", y = "Percentage of deaths", title = "Percentage of COVID-19 deaths by gender in people with and without hypertension") + scale_fill_discrete(name = "Hypertension", labels = c("NO", "YES")) 
+```
+
+```{r}
+china_data %>%
+  filter(
+    dead ==1
+  ) %>%
+  mutate(
+    sex = factor(sex), 
+    cvd = factor(cvd)
+  ) %>%
+  group_by(
+    sex, cvd
+  ) %>%
+  dplyr::summarise(
+    count = n()
+  ) %>%
+  dplyr::mutate(
+    percent = round((count/sum(count))*100, digits = 2)
+  ) %>%
+  ggplot(aes(x = sex, y = percent)) +
+  geom_bar(aes(fill = cvd), position = "dodge", stat = "identity", width = .5) +
+      geom_text(aes(label = percent, group = cvd), position = position_dodge(width = 0.5), vjust = -0.5) +
+      labs(x = "Sex", y = "Percentage of deaths", title = "Percentage of COVID-19 deaths by gender in people with and without CVD") + scale_fill_discrete(name = "CVD", labels = c("NO", "YES")) 
+```
+```{r}
+china_data %>%
+  select(
+    agegroup, dead
+  ) %>%
+  group_by(
+    agegroup
+  ) %>%
+  dplyr::summarise(
+  count = n()  
+  ) %>%
+  knitr::kable()
+```
+
+```{r}
+china_data %>%
+  filter(
+    dead ==1
+  ) %>%
+  mutate(
+    cvd = factor(cvd)
+  ) %>%
+  group_by(
+    agegroup, cvd
+  ) %>%
+  dplyr::summarise(
+   count = n() 
+  ) %>%
+  ggplot(
+    aes(
+      x = agegroup, y = count
+    )
+  ) + geom_bar(aes(fill = cvd), position = "dodge", stat = "identity", width = .5) +
+      geom_text(aes(label = count, group = cvd), position = position_dodge(width = 0.5), vjust = -0.5) + labs(x = "Age Group", y = "Number of Deaths", title = "Number of deaths due to COVID-19 by age group in people with and without CVD") + scale_fill_discrete(name = "CVD", labels = c("NO", "YES")) 
+```
+
+```{r}
+china_data %>%
+  filter(
+    dead ==1
+  ) %>%
+  mutate(
+    hypertension = factor(hypertension)
+  ) %>%
+  group_by(
+    agegroup, hypertension
+  ) %>%
+  dplyr::summarise(
+   count = n() 
+  ) %>%
+  ggplot(
+    aes(
+      x = agegroup, y = count
+    )
+  ) + geom_bar(aes(fill = hypertension), position = "dodge", stat = "identity", width = .5) +
+      geom_text(aes(label = count, group = hypertension), position = position_dodge(width = 0.5), vjust = -0.5) + labs(x = "Age Group", y = "Number of Deaths", title = "Number of deaths due to COVID-19 by age group in people with and without CVD") + scale_fill_discrete(name = "Hypertension", labels = c("NO", "YES")) 
+```
+
