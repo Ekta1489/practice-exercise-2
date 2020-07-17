@@ -37,6 +37,8 @@ china_data =  read_sas("./data/corona_china.sas7bdat") %>%
 southkorea_data = read_sas("./data/corona_southkorea.sas7bdat") %>%
   janitor::clean_names()
 ```
+Data set:
+------------------------------------------------------------------------------------------------------
 Variable Name	
 ID	Patient unique ID
 Agegroup	Age (years) at diagnosis.
@@ -59,6 +61,67 @@ CVD	Comorbid cardiovascular disease at COVID19 diagnosis
 0 = no
 Dead	1 = yes
 0 = no
+------------------------------------------------------------------------------------------------------
+
+Number of people in each gender
+
+```{r}
+china_data %>%
+group_by(
+  sex
+) %>%
+  dplyr::summarise(
+    number = n() 
+  ) %>%
+ knitr::kable()
+```
+
+Number of people in each age group
+
+```{r}
+china_data %>%
+group_by(
+  agegroup
+) %>%
+  dplyr::summarise(
+    number = n()
+  ) %>%
+  knitr::kable()
+```
+
+Number of people with and without hypertension
+
+```{r}
+china_data %>%
+group_by(
+  hypertension
+) %>%
+  dplyr::summarise(
+    number = n()
+  ) %>%
+  dplyr::mutate(
+    percent = (number/sum(number))*100
+  ) %>%
+  knitr::kable()
+```
+
+Percentage of people with and without CVD
+
+```{r}
+china_data %>%
+group_by(
+  cvd
+) %>%
+  dplyr::summarise(
+    number = n()
+  ) %>%
+  dplyr::mutate(
+    percent = (number/sum(number))*100
+  ) %>%
+  knitr::kable()
+```
+
+Deaths due to COVID-19 by gender
 
 ```{r}
 china_data %>%
@@ -77,6 +140,8 @@ china_data %>%
     )
   ) + geom_bar(stat = "identity", width = 0.3) + labs(x = "Sex", y = "Percentage of Deaths", title = "Deaths due to COVID-19 by gender") + theme(axis.text.x = element_text(angle = 90, vjust = 0.9, hjust = 0.9)) 
 ```
+
+Percentage of COVID-19 deaths by gender in people with and without Hypertension
 
 ```{r}
 china_data %>%
@@ -102,10 +167,12 @@ china_data %>%
       labs(x = "Sex", y = "Percentage of deaths", title = "Percentage of COVID-19 deaths by gender in people with and without hypertension") + scale_fill_discrete(name = "Hypertension", labels = c("NO", "YES")) 
 ```
 
+Percentage of COVID-19 deaths by gender in people with and without CVD
+
 ```{r}
 china_data %>%
   filter(
-    dead ==1
+    dead == 1
   ) %>%
   mutate(
     sex = factor(sex), 
@@ -125,6 +192,9 @@ china_data %>%
       geom_text(aes(label = percent, group = cvd), position = position_dodge(width = 0.5), vjust = -0.5) +
       labs(x = "Sex", y = "Percentage of deaths", title = "Percentage of COVID-19 deaths by gender in people with and without CVD") + scale_fill_discrete(name = "CVD", labels = c("NO", "YES")) 
 ```
+
+Number of COVID-19 deaths by age groups:
+
 ```{r}
 china_data %>%
   select(
@@ -139,10 +209,12 @@ china_data %>%
   knitr::kable()
 ```
 
+Number of deaths due to COVID-19 by age group in people with and without CVD
+
 ```{r}
 china_data %>%
   filter(
-    dead ==1
+    dead == 1
   ) %>%
   mutate(
     cvd = factor(cvd)
@@ -161,10 +233,12 @@ china_data %>%
       geom_text(aes(label = count, group = cvd), position = position_dodge(width = 0.5), vjust = -0.5) + labs(x = "Age Group", y = "Number of Deaths", title = "Number of deaths due to COVID-19 by age group in people with and without CVD") + scale_fill_discrete(name = "CVD", labels = c("NO", "YES")) 
 ```
 
+Number of deaths due to COVID-19 by age group in people with and without Hypertension
+
 ```{r}
 china_data %>%
   filter(
-    dead ==1
+    dead == 1
   ) %>%
   mutate(
     hypertension = factor(hypertension)
