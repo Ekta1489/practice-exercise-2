@@ -37,8 +37,9 @@ china_data =  read_sas("./data/corona_china.sas7bdat") %>%
 southkorea_data = read_sas("./data/corona_southkorea.sas7bdat") %>%
   janitor::clean_names()
 ```
+
 Data set:
-------------------------------------------------------------------------------------------------------
+
 Variable Name	
 ID	Patient unique ID
 Agegroup	Age (years) at diagnosis.
@@ -61,7 +62,6 @@ CVD	Comorbid cardiovascular disease at COVID19 diagnosis
 0 = no
 Dead	1 = yes
 0 = no
-------------------------------------------------------------------------------------------------------
 
 Number of people in each gender
 
